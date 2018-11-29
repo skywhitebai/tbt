@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Thread.sleep;
 
@@ -23,8 +24,7 @@ public class ThreadPoolExecutorTest {
         }
         // 创建一个同时允许线程并发执行的线程池,用于创建订单
         ExecutorService executor = new ThreadPoolExecutor(1, 10, 10L,
-                TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(10),
-                new ThreadPoolExecutor.CallerRunsPolicy());
+                TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(10));
         for (Integer num : waitDealList) {
             Runnable runnable = () -> {
                 System.out.println( Thread.currentThread().getName()+new Date()+":"+num);
@@ -56,7 +56,7 @@ public class ThreadPoolExecutorTest {
             waitDealList.add(i);
         }
         // 创建一个同时允许线程并发执行的线程池,用于创建订单
-        ExecutorService executor = new ThreadPoolExecutor(1, waitDealList.size(), 10L,
+        ExecutorService executor = new ThreadPoolExecutor(1,20, 10L,
                 TimeUnit.SECONDS, new SynchronousQueue<Runnable>(),
                 new ThreadPoolExecutor.CallerRunsPolicy());
         for (Integer num : waitDealList) {
@@ -82,7 +82,34 @@ public class ThreadPoolExecutorTest {
         }
     }
 
-
+    @Test
+    public void testSynchronousQueue2(){
+        List<Integer> waitDealList = new ArrayList<>(10);
+        AtomicInteger a = new AtomicInteger();
+        for (int i = 0; i < 1000; i++) {
+            waitDealList.add(i);
+        }
+        // 创建一个同时允许线程并发执行的线程池,用于创建订单
+        ExecutorService executor = new ThreadPoolExecutor(1,20, 10L,
+                TimeUnit.SECONDS, new SynchronousQueue<Runnable>(),
+                new ThreadPoolExecutor.CallerRunsPolicy());
+        for (Integer num : waitDealList) {
+            Runnable runnable = () -> {
+                a.getAndAdd(1);
+            };
+            executor.execute(runnable);
+        }
+        executor.shutdown();
+        try {
+            while (!executor.awaitTermination(3000, TimeUnit.MILLISECONDS)) {
+                System.out.println(new Date()+":批量创建中台订单-线程未关闭");
+            }
+            System.out.println(new Date()+":批量创建中台订单-线程已关闭");
+        } catch (InterruptedException e) {
+            System.out.println(new Date()+":批量创建中台订单-线程异常"+ e.getMessage());
+        }
+        System.out.println("a:"+a);
+    }
 
 
 }
