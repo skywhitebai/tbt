@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.StringUtils;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -57,5 +58,26 @@ public class ThreadTest1 {
         Thread thread=new ThreadDemo();
         thread.run();
         System.out.println("thread is run");
+    }
+    @Test
+    public  void testNewStart(){
+        Thread t = new Thread(new Runnable(){
+            public void run(){
+                int dealNum=1;
+                while(dealNum<3){
+                    System.out.println("dealNum:"+dealNum);
+                    try {
+                        Thread.sleep(dealNum*dealNum*1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    dealNum++;
+                }
+
+                System.out.println("end:");
+            }});
+        System.out.println("start1:");
+        t.start();
+        System.out.println("start2:");
     }
 }

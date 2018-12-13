@@ -86,7 +86,7 @@ public class ThreadPoolExecutorTest {
     public void testSynchronousQueue2(){
         List<Integer> waitDealList = new ArrayList<>(10);
         AtomicInteger a = new AtomicInteger();
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 10000; i++) {
             waitDealList.add(i);
         }
         // 创建一个同时允许线程并发执行的线程池,用于创建订单
@@ -95,6 +95,7 @@ public class ThreadPoolExecutorTest {
                 new ThreadPoolExecutor.CallerRunsPolicy());
         for (Integer num : waitDealList) {
             Runnable runnable = () -> {
+                System.out.println( Thread.currentThread().getName()+new Date()+":"+num);
                 a.getAndAdd(1);
             };
             executor.execute(runnable);
